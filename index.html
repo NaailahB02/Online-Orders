@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Indian and Continental Deliveries</title>
+
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 700px;
+      margin: 30px auto;
+      padding: 10px;
+      background: #fafafa;
+      color: #333;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 6px;
+      font-size: 1.6rem;
+      font-weight: bold;
+    }
+
+    h2 {
+      text-align: center;
+      margin-top: 0;
+      margin-bottom: 20px;
+      font-size: 1.1rem;
+      color: #555;
+    }
+
+    .top-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .section-title {
+      margin-top: 24px;
+      font-weight: bold;
+      font-size: 1.05rem;
+      border-left: 4px solid #3498db;
+      padding-left: 8px;
+      margin-bottom: 6px;
+    }
+
+    .section-subtext {
+      font-size: 0.85rem;
+      color: #666;
+      margin-bottom: 8px;
+    }
+
+    label {
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    input, textarea, select {
+      padding: 9px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      width: 100%;
+      font-size: 0.95rem;
+      background: white;
+      box-sizing: border-box;
+    }
+
+    ::placeholder {
+      font-style: normal;
+      color: #999;
+    }
+
+    .item-card {
+      background: white;
+      padding: 14px;
+      border-radius: 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      margin-bottom: 15px;
+    }
+
+    .field-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .field-row > div {
+      flex: 1;
+    }
+
+    .product-row, .special-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+      background: white;
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      align-items: center;
+    }
+
+    .remove-btn {
+      background: #e74c3c;
+      border: none;
+      color: white;
+      padding: 8px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      white-space: nowrap;
+      font-weight: 600;
+      height: 38px;
+      align-self: center;
+    }
+
+    .remove-btn:hover {
+      background: #c0392b;
+    }
+
+    .add-btn, .action-btn {
+      margin-top: 10px;
+      padding: 9px 14px;
+      background: #3498db;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    .add-btn:hover, .action-btn:hover {
+      background: #2980b9;
+    }
+
+    .secondary-btn {
+      background: #7f8c8d;
+    }
+    .secondary-btn:hover {
+      background: #636e72;
+    }
+
+    .success-btn {
+      background: #27ae60;
+    }
+    .success-btn:hover {
+      background: #1e874b;
+    }
+
+    /* Searchable dropdown */
+    .search-select {
+      position: relative;
+      width: 100%;
+    }
+
+    .search-select-input {
+      width: 100%;
+      padding: 9px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      background: #fff;
+      box-sizing: border-box;
+      cursor: pointer;
+    }
+
+    .search-select-arrow {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.8rem;
+      color: #777;
+      pointer-events: none;
+    }
+
+    .search-select-panel {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      margin-top: 3px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+      z-index: 999;
+      display: none;
+    }
+
+    .search-select.open .search-select-panel {
+      display: block;
+    }
+
+    .search-select-filter {
+      border: none;
+      border-bottom: 1px solid #eee;
+      border-radius: 6px 6px 0 0;
+      padding: 8px;
+      width: 100%;
+      box-sizing: border-box;
+      font-size: 0.9rem;
+    }
+
+    .search-select-options {
+      max-height: 200px;
+      overflow-y: auto;
+      padding: 4px 0;
+    }
+
+    .search-select-option {
+      padding: 6px 10px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .search-select-option:hover {
+      background: #f1f5f9;
+    }
+
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .admin-city-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .admin-city-row label {
+      margin: 0;
+      font-weight: 500;
+      min-width: 140px;
+    }
+
+    .admin-city-row input[type="date"] {
+      flex: 1;
+    }
+
+    @media(max-width: 550px) {
+      .product-row, .special-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .remove-btn {
+        width: 100%;
+      }
+      .field-row {
+        flex-direction: column;
+      }
+      .top-actions {
+        justify-content: flex-start;
+      }
+      .admin-city-row {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .admin-city-row label {
+        min-width: auto;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>Indian and Continental Deliveries</h1>
+  <h2>Order Form</h2>
+
+  <div class="top-actions">
+    <button id="saveDraftBtn" class="action-btn secondary-btn" type="button">Save Draft</button>
+    <button id="loadDraftBtn" class="action-btn secondary-btn" type="button">Load Draft</button>
+    <button id="toggleAdminBtn" class="action-btn secondary-btn" type="button">Admin Settings</button>
+  </div>
+
+  <!-- ADMIN PANEL -->
+  <div id="adminPanel" class="item-card" style="display:none;">
+    <div class="admin-header">
+      <div><strong>Admin – Delivery Schedule</strong></div>
+    </div>
+    <div class="section-subtext" style="margin-top:6px;">
+      Set the delivery date for each city. These dates are stored in Google Sheets (Settings tab)
+      and are used to generate Order IDs (YYMMDD part).
+    </div>
+
+    <div class="admin-city-row">
+      <label for="date_SC">Scarborough (SC)</label>
+      <input type="date" id="date_SC">
+    </div>
+
+    <div class="admin-city-row">
+      <label for="date_HG">Harrogate (HG)</label>
+      <input type="date" id="date_HG">
+    </div>
+
+    <div class="admin-city-row">
+      <label for="date_SY">Selby & York (SY)</label>
+      <input type="date" id="date_SY">
+    </div>
+
+    <div class="admin-city-row">
+      <label for="date_BD">Bridlington (BD)</label>
+      <input type="date" id="date_BD">
+    </div>
+
+    <button id="saveScheduleBtn" class="action-btn success-btn" type="button">Save Delivery Dates</button>
+  </div>
+
+  <!-- CUSTOMER DETAILS -->
+  <div class="section-title">Customer Details</div>
+  <div class="section-subtext">
+    Please provide the customer’s details and delivery city.
+  </div>
+  <div class="item-card">
+    <div>
+      <label for="fullName">Name</label>
+      <input type="text" id="fullName" placeholder="Full Name">
+    </div>
+    <br>
+    <div class="field-row">
+      <div>
+        <label for="phoneNumber">Contact Number</label>
+        <input type="text" id="phoneNumber" placeholder="Main contact number">
+      </div>
+      <div>
+        <label for="altPhoneNumber">Alternative Contact</label>
+        <input type="text" id="altPhoneNumber" placeholder="Alternative contact (optional)">
+      </div>
+    </div>
+    <br>
+    <div class="field-row">
+      <div>
+        <label for="deliveryCity">Delivery City</label>
+        <select id="deliveryCity">
+          <option value="">Select city</option>
+          <option value="SC">Scarborough</option>
+          <option value="HG">Harrogate</option>
+          <option value="SY">Selby & York</option>
+          <option value="BD">Bridlington</option>
+        </select>
+      </div>
+      <div>
+        <label for="postcode">Postcode</label>
+        <input type="text" id="postcode" placeholder="Postcode">
+      </div>
+    </div>
+    <br>
+    <div>
+      <label>Delivery Address</label>
+    </div>
+    <div>
+      <input type="text" id="address1" placeholder="Address Line 1">
+    </div>
+    <br>
+    <div>
+      <input type="text" id="address2" placeholder="Address Line 2 (optional)">
+    </div>
+  </div>
+
+  <!-- REGULAR ITEMS -->
+  <div class="section-title">Items</div>
+  <div class="section-subtext">
+    Select your items from the list below and add any notes if needed.
+  </div>
+  <div id="productList"></div>
+  <button id="addProductBtn" class="add-btn" type="button">Add Item</button>
+
+  <!-- SPECIAL ITEMS -->
+  <div class="section-title">Special / Custom Items</div>
+  <div class="section-subtext">
+    Use this section if you can’t find your item in the dropdown above.  
+    Add the item name and any notes (e.g. brand, size, type).
+  </div>
+  <div id="specialList"></div>
+  <button id="addSpecialBtn" class="add-btn" type="button">Add Special Item</button>
+
+  <!-- ORDER NOTES -->
+  <div class="section-title">Order Notes</div>
+  <div class="section-subtext">
+    Add delivery instructions or special instructions here (e.g. preferred time, access details, substitutions).
+  </div>
+  <div class="item-card">
+    <textarea id="orderNotes" rows="3" placeholder="Delivery instructions, gate code, leave with neighbour, substitutions, etc."></textarea>
+  </div>
+
+  <!-- SUBMIT BUTTON -->
+  <button id="submitBtn" class="action-btn success-btn" type="button">Submit Order</button>
+
+<script>
+const ADMIN_PIN = "2002";
+
+const CITY_MAP = {
+  SC: { name: "Scarborough" },
+  HG: { name: "Harrogate" },
+  SY: { name: "Selby & York" },
+  BD: { name: "Bridlington" }
+};
+
+const GOOGLE_SCRIPT_ENDPOINT =
+  "https://script.google.com/macros/s/AKfycbwhy72m1G9ftU8GREapAW-3J8uYCqlxNDbuMShD40GsGUnhL1d0YF_I25SrKvMJaODu/exec";
+
+const DRAFT_KEY = "ICD_orderDraft_v1";
+
+let deliverySchedule = {
+  SC: "",
+  HG: "",
+  SY: "",
+  BD: ""
+};
+
+const ITEMS = [
+  "Honey beans, 20kg","White gari, 20kg","Yellow gari, 20kg",
+  "Semovita, 10kg (5 x 2kg)","Honeywell Semolina, 9kg (5 x 1.8kg)",
+  "Malta Guinness cans pack, 24 x 330ml","Maltina cans pack, 24 x 330ml",
+  "Okomu red oil, 4L","Peak milk powder, 2.5kg","Nido milk powder, 2.5kg",
+  "Saka natural mineral water, 24 x 500ml",
+  "Olu Olu chilli plantain chips box, 24 x 60g",
+  "Olu Olu unripe plantain chips box, 24 x 60g",
+  "Olu Olu ripe plantain chips box, 24 x 60g",
+  "Ola plantain chips sweet, chilli, 24 x 60g",
+  "Asiko plantain chips chilli, 24 x 75g",
+  "Asiko plantain chips slightly salt, 24 x 75g",
+  "Chicken gizzard box, 10kg","Hard chicken whole, 10kg",
+  "Hard chicken legs, 10kg","Turkey mid wings, 10kg",
+  "Turkey drumsticks, 10kg","Mackerel/Titus box, 20kg",
+  "Mackerel/Titus box, 10kg","Catfish whole box, 5kg",
+  "Hake whole box, 10kg","Tilapia whole box, 5kg",
+  "Yellow croaker whole box, 6kg","Boneless beef, per kg",
+  "Beef with bone, per kg","Beef mince, per kg",
+  "Beef tripe (shaki), per kg","Beef skin (kpomo), per kg",
+  "Beef liver, per kg","Beef kidney, per kg","Abodi, per kg",
+  "Mixed lamb, per kg","Lamb chops, per kg","Lamb ribs, per kg",
+  "Lamb leg, per kg","Lamb shoulder, per kg",
+  "Lamb tripe (shaki), per kg","Whole medium chicken, per kg",
+  "Whole baby chicken, each","Chicken drumsticks, per kg",
+  "Chicken wings, per kg","Chicken legs, per kg",
+  "Chicken gizzard, per kg","Chicken liver, per kg",
+  "Chicken heart, per kg","Chicken breast, per kg",
+  "Lion head golden sella basmati, 10kg",
+  "Lion head easy cook, 20kg",
+  "Lion head easy cook rice, 10kg",
+  "Lion head easy cook rice, 5kg",
+  "Lion head easy cook, 2kg",
+  "Tolly boy easy cook, 20kg",
+  "Tolly boy easy cook, 10kg",
+  "Puregro easy cook, 5kg",
+  "Puregro golden sella basmati, 10kg",
+  "Puregro golden sella basmati, 5kg",
+  "Puregro golden sella basmati, 2kg",
+  "Mamas pride jollof rice extra long grain golden sella basmati, 1.5kg",
+  "Mamas pride jollof rice extra long grain golden sella basmati, 4kg",
+  "White onion bag, 4kg","Red onion bag, 9kg",
+  "Yam box (new crop yam /puna yam), 17kg",
+  "Green plantain box, 20kg",
+  "Yellow plantain box, 20kg",
+  "Okra box, 4kg","Tomato box, 6kg",
+  "Jamaican pepper (rodo) box, 4kg",
+  "Jamaican pepper (rodo) box, 3kg",
+  "Jamaican pepper (rodo) box, 2kg",
+  "Red pointed pepper (Shombo), 4kg",
+  "Red long chillies (Bawa) box, 3kg",
+  "Green bell pepper box, 5kg",
+  "Red bell pepper box, 5kg","Ugu, box",
+  "Irish potatoes, 2kg","Green apple, 2 for",
+  "Red apples, 4 for £1","Yam, per kg",
+  "Banana, per kg","Green plantain, each",
+  "Yellow plantain, each","Eddo (Cocoyam), per kg",
+  "Uganda Cocoyam, per kg","Uganda ginger, per kg",
+  "Fresh turmeric, per kg","Ginger, per kg",
+  "Garlic, per kg","Okra, per kg",
+  "Tomatoes, per kg","White Onion, per kg",
+  "Red onion, per kg","Bullet chilli, per kg",
+  "Garden egg, per kg",
+  "Jamaican pepper (rodo), per kg",
+  "Red pointed pepper (Shombo), per kg",
+  "Red long chillies (Bawa), per kg",
+  "Thai red chillies, per kg",
+  "Green Kenya chillies, per kg",
+  "Green bell pepper, per kg",
+  "Red bell pepper, per kg",
+  "White sweet potato, per kg",
+  "Red sweet potato, per kg",
+  "Limes, each","Lemon, each",
+  "Bitter kola, per kg","Spinach, each",
+  "Coriander, each","Ugu, each",
+  "Efo tete, each","Ewedu, each",
+  "Scent leaf, each","Shoko, each",
+  "Moi moi leaves, each","Oha, each",
+  "Uziza, each","Water leaves, per kg",
+  "Abuja bread, each","Lulu bread, each",
+  "Lulu twist, each","Eko bread, each",
+  "Egg tray medium, 30pcs",
+  "Free range egg carton medium, 12pcs",
+  "Knorr chicken seasoning cubes, each",
+  "Knorr beef seasoning cubes, each",
+  "Maggi star seasoning, each",
+  "Maggi crayfish seasoning cubes, (60 x 10g)",
+  "Honey beans measured, per kg",
+  "White gari measured, per kg",
+  "Yellow gari measured, per kg",
+  "Honey beans measured, per kg",
+  "Lady b custard, 500g",
+  "Lady b custard, 1.6kg",
+  "Checkers custard banana, 2kg",
+  "Checkers custard vanilla, 2kg",
+  "Checkers custard banana, 400g",
+  "Checkers custard vanilla, 400g",
+  "Tropical sun milk powder, 900g",
+  "Quaker Oats, 500g",
+  "Cerelac honey wheat, 1kg",
+  "Cerelac mixed fruits and wheat, 1kg",
+  "Milo pack (nigerian), 800g",
+  "Dried bay leaves, 80g",
+  "Muza dried locust beans, 50g",
+  "Jatam egusi, 200g",
+  "Jatam dried locust beans, 180g",
+  "Jatam grounded crayfish, 100g",
+  "Market price ogbono, 40g",
+  "Market price crayfish, 50g",
+  "Market price egusi, 100g",
+  "Market price suya spice, 80g",
+  "Market price pepper soup spice, 50g",
+  "Ola (chilli,sweet,green) plantain chips",
+  "Asiko (slightly salt), each",
+  "Olu Olu (sweet, chilli), each",
+  "BB honey roasted plantain chips, each",
+  "Mamas pride chin chin, 250g",
+  "Mamas pride chin chin, 450g",
+  "Elex peanuts (groundnut), 500g",
+  "Lespdon sardines, tin",
+  "Titus sardines, tin",
+  "De rica tomato paste, 70g",
+  "De rica tomato paste, 400g",
+  "De rica tomato paste, 850g",
+  "Roberts tomato paste, 400g",
+  "Roberts tomato paste, 800g",
+  "Plum tomatoes tin, 400g",
+  "Chopped tomatoes tin, 400g",
+  "Tiger tiger creamed coconut block",
+  "Tropical sun coconut milk powder, 300g",
+  "Tiger tiger coconut milk, 400ml",
+  "KTC virgin coconut oil, 250ml",
+  "Golden morn, 900g","Golden morn, 300g",
+  "Mamas pride banku mix dough, 1kg",
+  "Mamas pride corn dough, 1kg",
+  "Mamas pride corn dough, 2kg",
+  "Puregro corn dough, 1kg",
+  "Purego corn dough, 2kg",
+  "Mamas pride cassava dough, 2kg",
+  "Puregro cassava dough, 2kg",
+  "Mamas pride plantain fufu carton, 680g",
+  "Mamas pride plantain fufu, 4kg",
+  "Mamas pride Cocoyam fufu cartons, 680g",
+  "Grandios dry pap powder (brown)",
+  "Grandios dry pap powder (white)",
+  "Grandios dry pap powder (yellow)",
+  "Mamas pride ijebu gari, 1.5kg",
+  "Mamas pride yellow gari, 1.5kg",
+  "Mamas pride white gari, 1.5kg",
+  "Mamas pride beans flour, 1.5kg",
+  "Mamas pride cassava flour, 1kg",
+  "Mamas pride pounded yam, 1.5kg",
+  "Puregro poundo, 1.5kg",
+  "Puregro poundo, 4kg",
+  "Puregro yam flour (amala), 1kg",
+  "Mamas pride ground chilli pepper, 80g",
+  "Mamas pride whole Birds Eye chilli pepper, 80g",
+  "Mamas pride dried okazi leaves, 25g",
+  "Mamas pride dried bitter leaves, 25g",
+  "Mamas pride shawa fillets, 80g",
+  "Mamas pride bonga fillets, 80g",
+  "Mamas pride smoked grounded crayfish",
+  "Mamas pride whole smoked prawns, 40g",
+  "Mamas pride smoked ground prawns, 40g",
+  "Bodrum sunflower oil, 1L",
+  "Bodrum vegetable oil, 1L",
+  "KTC sunflower oil, 5L",
+  "KTC vegetable oil, 5L",
+  "Ghana fresh banga paste palm soup concentrate, 800g tin",
+  "Unifresh banga paste palm soup concentrate",
+  "Okomu red oil, 2L",
+  "Puregro yam flour, 3.5kg",
+  "Mama pride pounded yam, 4kg",
+  "Ajibite honey beans, 4kg",
+  "Puregro black eye beans, 4kg",
+  "Puregro peeled beans, 4kg",
+  "Mamas pride yellow gari, 4kg",
+  "Mamas pride Ghana gari, 4kg",
+  "Mamas pride ijebu gari, 4kg",
+  "Honeywell semolina, 1.8kg",
+  "Semovita, 2kg",
+  "Honeywell wheat, 1.8kg",
+  "Cow feet, per kg",
+  "Whole hard chicken, each",
+  "Boneless goat meat, per kg",
+  "Bone in goat meat, per kg",
+  "Turkey drumsticks, per kg",
+  "Turkey wings, per kg",
+  "Panga whole, 2.5kg",
+  "Panga steaks, 900g",
+  "Tilapia whole, 2.4kg",
+  "Tilapia steaks, per kg",
+  "Yellow croaker whole, per kg",
+  "Yellow croaker steaks, per kg",
+  "Yellow croaker whole, 3kg",
+  "Catfish whole, 2.5kg",
+  "Catfish steaks, 900g",
+  "Mackerel/Titus, per kg",
+  "Milegate cooked peeled king prawns",
+  "Peninsula Cooked peeled prawns (100/150)",
+  "Frozen mixed veg, 800g",
+  "Frozen peas, each",
+  "Frozen water leaves, 500g",
+  "Frozen scent leaves, each",
+  "Frozen ewedu, each",
+  "Frozen uziza, each",
+  "Frozen chips/fries, 2.5kg",
+  "Frozen yellow pap, 200g",
+  "Large Tortilla Wraps, 10pcs",
+  "Olu Olu Poundo, 5kg",
+  "Elubo Yam Flour, 5kg",
+  "Indomie Chicken Noodles Box, 40pcs",
+  "Indomie Onion Noodles Box, 40pcs",
+  "Schweppes virgin mojito, 330ml"
+];
+
+const QTY_OPTIONS = ["","1","2","3","4","5","6","7","8","9","10","1/2","1/4","3/4","1/3","2/3"];
+
+/* --- Searchable dropdown core --- */
+function closeAllSearchSelects() {
+  document.querySelectorAll(".search-select.open").forEach(el => el.classList.remove("open"));
+}
+
+function createSearchSelect(options, placeholder, hiddenClass, initialValue) {
+  const wrapper = document.createElement("div");
+  wrapper.className = "search-select";
+
+  const visibleInput = document.createElement("input");
+  visibleInput.type = "text";
+  visibleInput.className = "search-select-input";
+  visibleInput.readOnly = true;
+  visibleInput.placeholder = placeholder;
+
+  const arrow = document.createElement("span");
+  arrow.className = "search-select-arrow";
+  arrow.textContent = "▾";
+
+  const panel = document.createElement("div");
+  panel.className = "search-select-panel";
+
+  const filterInput = document.createElement("input");
+  filterInput.type = "text";
+  filterInput.className = "search-select-filter";
+  filterInput.placeholder = "Type to search...";
+
+  const optionsContainer = document.createElement("div");
+  optionsContainer.className = "search-select-options";
+
+  const hidden = document.createElement("input");
+  hidden.type = "hidden";
+  hidden.className = hiddenClass;
+
+  options.forEach(opt => {
+    const optDiv = document.createElement("div");
+    optDiv.className = "search-select-option";
+    optDiv.textContent = opt;
+    optDiv.addEventListener("click", (e) => {
+      e.stopPropagation();
+      hidden.value = opt;
+      visibleInput.value = opt;
+      wrapper.classList.remove("open");
+    });
+    optionsContainer.appendChild(optDiv);
+  });
+
+  if (initialValue) {
+    hidden.value = initialValue;
+    visibleInput.value = initialValue;
+  }
+
+  panel.appendChild(filterInput);
+  panel.appendChild(optionsContainer);
+
+  wrapper.appendChild(visibleInput);
+  wrapper.appendChild(arrow);
+  wrapper.appendChild(panel);
+  wrapper.appendChild(hidden);
+
+  function filterOptions(query) {
+    const q = query.toLowerCase();
+    optionsContainer.querySelectorAll(".search-select-option").forEach(optEl => {
+      const text = optEl.textContent.toLowerCase();
+      optEl.style.display = text.includes(q) ? "block" : "none";
+    });
+  }
+
+  function openPanel() {
+    closeAllSearchSelects();
+    wrapper.classList.add("open");
+    filterInput.value = "";
+    filterOptions("");
+    filterInput.focus();
+  }
+
+  visibleInput.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (wrapper.classList.contains("open")) {
+      wrapper.classList.remove("open");
+    } else {
+      openPanel();
+    }
+  });
+
+  arrow.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (wrapper.classList.contains("open")) {
+      wrapper.classList.remove("open");
+    } else {
+      openPanel();
+    }
+  });
+
+  filterInput.addEventListener("click", (e) => e.stopPropagation());
+  filterInput.addEventListener("input", (e) => filterOptions(e.target.value));
+
+  return wrapper;
+}
+
+document.addEventListener("click", () => closeAllSearchSelects());
+
+/* --- Row builders --- */
+function addProductRow(data) {
+  const row = document.createElement("div");
+  row.className = "product-row";
+
+  const qtyWrapper = document.createElement("div");
+  qtyWrapper.style.flex = "0 0 90px";
+  qtyWrapper.appendChild(createSearchSelect(QTY_OPTIONS, "Qty", "qty", data && data.qty));
+
+  const itemWrapper = document.createElement("div");
+  itemWrapper.style.flex = "2";
+  itemWrapper.appendChild(createSearchSelect(ITEMS, "Select item", "item-name", data && data.item));
+
+  const notesWrapper = document.createElement("div");
+  notesWrapper.style.flex = "1";
+  const notesInput = document.createElement("input");
+  notesInput.type = "text";
+  notesInput.className = "item-notes";
+  notesInput.placeholder = "Notes";
+  if (data) notesInput.value = data.notes || "";
+  notesWrapper.appendChild(notesInput);
+
+  const removeBtn = document.createElement("button");
+  removeBtn.type = "button";
+  removeBtn.className = "remove-btn";
+  removeBtn.textContent = "X";
+  removeBtn.addEventListener("click", () => row.remove());
+
+  row.appendChild(qtyWrapper);
+  row.appendChild(itemWrapper);
+  row.appendChild(notesWrapper);
+  row.appendChild(removeBtn);
+
+  document.getElementById("productList").appendChild(row);
+}
+
+function addSpecialRow(data) {
+  const row = document.createElement("div");
+  row.className = "special-row";
+
+  const qtyWrapper = document.createElement("div");
+  qtyWrapper.style.flex = "0 0 90px";
+  qtyWrapper.appendChild(createSearchSelect(QTY_OPTIONS, "Qty", "qty", data && data.qty));
+
+  const nameWrapper = document.createElement("div");
+  nameWrapper.style.flex = "2";
+  const nameInput = document.createElement("input");
+  nameInput.type = "text";
+  nameInput.className = "special-name";
+  nameInput.placeholder = "Special item name";
+  if (data) nameInput.value = data.name || "";
+  nameWrapper.appendChild(nameInput);
+
+  const notesWrapper = document.createElement("div");
+  notesWrapper.style.flex = "1";
+  const notesInput = document.createElement("input");
+  notesInput.type = "text";
+  notesInput.className = "special-notes";
+  notesInput.placeholder = "Notes";
+  if (data) notesInput.value = data.notes || "";
+  notesWrapper.appendChild(notesInput);
+
+  const removeBtn = document.createElement("button");
+  removeBtn.type = "button";
+  removeBtn.className = "remove-btn";
+  removeBtn.textContent = "X";
+  removeBtn.addEventListener("click", () => row.remove());
+
+  row.appendChild(qtyWrapper);
+  row.appendChild(nameWrapper);
+  row.appendChild(notesWrapper);
+  row.appendChild(removeBtn);
+
+  document.getElementById("specialList").appendChild(row);
+}
+
+/* --- Form + draft --- */
+function collectFormData() {
+  const regularItems = [];
+  document.querySelectorAll("#productList .product-row").forEach(row => {
+    const qtyEl = row.querySelector(".qty");
+    const itemEl = row.querySelector(".item-name");
+    const notesEl = row.querySelector(".item-notes");
+    const qty = qtyEl ? qtyEl.value : "";
+    const item = itemEl ? itemEl.value : "";
+    const notes = notesEl ? notesEl.value : "";
+    if (qty || item || notes) {
+      regularItems.push({ qty, item, notes });
+    }
+  });
+
+  const specialItems = [];
+  document.querySelectorAll("#specialList .special-row").forEach(row => {
+    const qtyEl = row.querySelector(".qty");
+    const nameEl = row.querySelector(".special-name");
+    const notesEl = row.querySelector(".special-notes");
+    const qty = qtyEl ? qtyEl.value : "";
+    const name = nameEl ? nameEl.value : "";
+    const notes = notesEl ? notesEl.value : "";
+    if (qty || name || notes) {
+      specialItems.push({ qty, name, notes });
+    }
+  });
+
+  return {
+    fullName: document.getElementById("fullName").value.trim(),
+    phoneNumber: document.getElementById("phoneNumber").value.trim(),
+    altPhoneNumber: document.getElementById("altPhoneNumber").value.trim(),
+    address1: document.getElementById("address1").value.trim(),
+    address2: document.getElementById("address2").value.trim(),
+    postcode: document.getElementById("postcode").value.trim(),
+    deliveryCity: document.getElementById("deliveryCity").value,
+    orderNotes: document.getElementById("orderNotes").value.trim(),
+    items: regularItems,
+    specialItems: specialItems
+  };
+}
+
+function saveDraft() {
+  const data = collectFormData();
+  localStorage.setItem(DRAFT_KEY, JSON.stringify(data));
+  alert("Draft saved on this device.");
+}
+
+function loadDraft() {
+  const raw = localStorage.getItem(DRAFT_KEY);
+  if (!raw) {
+    alert("No saved draft found on this device.");
+    return;
+  }
+  const data = JSON.parse(raw);
+
+  document.getElementById("fullName").value = data.fullName || "";
+  document.getElementById("phoneNumber").value = data.phoneNumber || "";
+  document.getElementById("altPhoneNumber").value = data.altPhoneNumber || "";
+  document.getElementById("address1").value = data.address1 || "";
+  document.getElementById("address2").value = data.address2 || "";
+  document.getElementById("postcode").value = data.postcode || "";
+  document.getElementById("deliveryCity").value = data.deliveryCity || "";
+  document.getElementById("orderNotes").value = data.orderNotes || "";
+
+  document.getElementById("productList").innerHTML = "";
+  (data.items || []).forEach(item => addProductRow(item));
+  if (!data.items || data.items.length === 0) addProductRow();
+
+  document.getElementById("specialList").innerHTML = "";
+  (data.specialItems || []).forEach(item => addSpecialRow(item));
+}
+
+function resetForm() {
+  document.getElementById("fullName").value = "";
+  document.getElementById("phoneNumber").value = "";
+  document.getElementById("altPhoneNumber").value = "";
+  document.getElementById("address1").value = "";
+  document.getElementById("address2").value = "";
+  document.getElementById("postcode").value = "";
+  document.getElementById("deliveryCity").value = "";
+  document.getElementById("orderNotes").value = "";
+
+  document.getElementById("productList").innerHTML = "";
+  addProductRow();
+  document.getElementById("specialList").innerHTML = "";
+
+  localStorage.removeItem(DRAFT_KEY);
+}
+
+/* --- Delivery schedule from Google Sheets --- */
+function applyScheduleToInputs() {
+  document.getElementById("date_SC").value = deliverySchedule.SC || "";
+  document.getElementById("date_HG").value = deliverySchedule.HG || "";
+  document.getElementById("date_SY").value = deliverySchedule.SY || "";
+  document.getElementById("date_BD").value = deliverySchedule.BD || "";
+}
+
+async function fetchScheduleFromServer() {
+  // This may still be blocked by CORS depending on Apps Script;
+  // it fails gracefully in console if so.
+  try {
+    const res = await fetch(GOOGLE_SCRIPT_ENDPOINT + "?mode=settings");
+    const json = await res.json();
+    deliverySchedule = Object.assign({ SC:"",HG:"",SY:"",BD:"" }, json);
+    applyScheduleToInputs();
+  } catch (err) {
+    console.error("Failed to load schedule from server:", err);
+  }
+}
+
+async function saveScheduleToServer() {
+  const schedule = {
+    SC: document.getElementById("date_SC").value || "",
+    HG: document.getElementById("date_HG").value || "",
+    SY: document.getElementById("date_SY").value || "",
+    BD: document.getElementById("date_BD").value || ""
+  };
+
+  try {
+    await fetch(GOOGLE_SCRIPT_ENDPOINT, {
+      method: "POST",
+      mode: "no-cors",
+      body: JSON.stringify({
+        mode: "settings",
+        schedule
+      })
+    });
+    deliverySchedule = schedule;
+    alert("Delivery dates saved.");
+  } catch (err) {
+    console.error("Error saving schedule:", err);
+    alert("Failed to save delivery dates. Check your connection.");
+  }
+}
+
+/* --- Order ID + submit --- */
+function generateOrderId(cityCode, deliveryDateStr) {
+  const [yyyy, mm, dd] = deliveryDateStr.split("-");
+  const yy = yyyy.slice(2);
+  const deliveryYYMMDD = yy + mm + dd;
+
+  const now = new Date();
+  const hh = String(now.getHours()).padStart(2, "0");
+  const min = String(now.getMinutes()).padStart(2, "0");
+  const timeHHMM = hh + min;
+
+  return `${cityCode}-${deliveryYYMMDD}-${timeHHMM}`;
+}
+
+async function sendOrderToGoogleSheets(orderObj) {
+  try {
+    await fetch(GOOGLE_SCRIPT_ENDPOINT, {
+      method: "POST",
+      mode: "no-cors",
+      body: JSON.stringify(orderObj)
+    });
+    return true;
+  } catch (err) {
+    console.error("Error sending to Google Sheets:", err);
+    return false;
+  }
+}
+
+async function submitOrder() {
+  const data = collectFormData();
+
+  if (!data.fullName || !data.phoneNumber || !data.deliveryCity) {
+    alert("Please fill in at least Name, Contact Number and Delivery City.");
+    return;
+  }
+
+  const cityCode = data.deliveryCity;
+  const cityInfo = CITY_MAP[cityCode];
+  if (!cityInfo) {
+    alert("Invalid city selected.");
+    return;
+  }
+
+  const deliveryDate = deliverySchedule[cityCode];
+  if (!deliveryDate) {
+    alert("No delivery date set for this city in Admin Settings (stored in Google Sheets).");
+    return;
+  }
+
+  const orderId = generateOrderId(cityCode, deliveryDate);
+
+  const fullAddressParts = [
+    data.address1,
+    data.address2,
+    cityInfo.name,
+    data.postcode
+  ].filter(Boolean);
+  const fullAddress = fullAddressParts.join(", ");
+
+  const orderObj = {
+    orderId,
+    cityName: cityInfo.name,
+    deliveryDate,
+    fullName: data.fullName,
+    phoneNumber: data.phoneNumber,
+    altPhoneNumber: data.altPhoneNumber,
+    fullAddress,
+    items: data.items,
+    specialItems: data.specialItems,
+    orderNotes: data.orderNotes
+  };
+
+  const ok = await sendOrderToGoogleSheets(orderObj);
+
+  if (ok) {
+    alert("Order submitted.\nOrder ID: " + orderId + "\nCheck your Google Sheet to confirm it was received.");
+    resetForm();
+  } else {
+    alert("There was a problem sending the order. Please try again or check your connection.");
+  }
+}
+
+/* --- Admin panel --- */
+function toggleAdminPanel() {
+  const panel = document.getElementById("adminPanel");
+  const isVisible = panel.style.display === "block";
+
+  if (isVisible) {
+    panel.style.display = "none";
+    return;
+  }
+
+  const pin = prompt("Enter admin PIN:");
+  if (pin === ADMIN_PIN) {
+    panel.style.display = "block";
+    applyScheduleToInputs();
+  } else if (pin !== null) {
+    alert("Incorrect PIN.");
+  }
+}
+
+/* --- Init --- */
+addProductRow();
+
+fetchScheduleFromServer(); // load delivery dates from Sheet (if CORS allows)
+loadDraft();               // auto-load draft if present
+
+document.getElementById("addProductBtn").addEventListener("click", () => addProductRow());
+document.getElementById("addSpecialBtn").addEventListener("click", () => addSpecialRow());
+
+document.getElementById("toggleAdminBtn").addEventListener("click", toggleAdminPanel);
+document.getElementById("saveScheduleBtn").addEventListener("click", saveScheduleToServer);
+
+document.getElementById("saveDraftBtn").addEventListener("click", saveDraft);
+document.getElementById("loadDraftBtn").addEventListener("click", loadDraft);
+
+document.getElementById("submitBtn").addEventListener("click", submitOrder);
+</script>
+
+</body>
+</html>
